@@ -8,7 +8,7 @@
 // Answer to Question 1
 int Question1();
 double f1(double x);     // Function in Question 1
-double Df1(double x);   // The derivative to f1
+double Df1(double x);    // The derivative to f1
 
 int main(){
     Question1();
@@ -20,7 +20,7 @@ double f1(double x){
     return 10.0*x*(1-x)*(x-1.0/4.0)-1.0/4.0;
 }
 double Df1(double x){
-    return (((10.0-12.0*x)*x)-1.0)/4.0;
+    return (((10.0-12.0*x)*x)-1.0)*5.0/2.0;
 }
 
 
@@ -35,12 +35,31 @@ int Question1(){
     xk = x0;
     fk = f1(xk);
     while(fabs(fk)>EPS8 && iter<MAXITER){
+        fk  = f1(xk);
         Dfk = Df1(xk);
         xk  = xk-fk/Dfk;
+        printf("%5d  %5.9f  %5.9f\n",iter,xk,fk);
         iter++;
     }
-    printf("%d\n",iter);
-    printf("%f\n",xk);
+    printf("k:%d, xk=%5.9f, f(xk)=%5.9f\n",iter,xk,fk);
+
+
+    printf("\nQustion (a)\n");
+    xk = x0;
+    fk = f1(xk);
+    while(fabs(fk)>EPS8 && iter<MAXITER){
+        fk  = f1(xk);
+        Dfk = Df1(xk);
+        xk  = xk-fk/Dfk/2.0;
+        printf("%5d  %5.9f  %5.9f\n",iter,xk,fk);
+        iter++;
+    }
+    printf("k:%d, xk=%5.9f, f(xk)=%5.9f\n",iter,xk,fk);
+
+
+
+
+
 
     return 0;
 }
