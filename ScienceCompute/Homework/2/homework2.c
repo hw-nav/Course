@@ -40,7 +40,6 @@ double f4(int n, double* z, double x);     // Function in Problem 4
 
 
 // Random Function
-float randfloat(void);
 float randfloat(float a, float b);
 
 
@@ -304,11 +303,7 @@ int Problem4(){
 
 
 // Random Function
-float randfloat(void){
-    float v=(rand(%__INT_MAX__))/(__INT_MAX__-1.0);
-    return v;
-}
 float randfloat(float a, float b){
-    float v=a+(b-a)*randflloat();
-    return v;
+    float v=(rand(%__INT_MAX__))/(__INT_MAX__-1.0);
+    return a+(b-a)*v;
 }
