@@ -73,11 +73,13 @@ int main(){
     // free(x2);
 
     // (d)
-    //int N[] = {1000,2000,4000,8000}, len=4;
-    int N[] = {3,4,5}, len=3;
+    int N[] = {1000,2000,4000,8000}, len=4;
+    //int N[] = {100,300,500}, len=3;
     int iter;
     double *b, *b_hat;
     double omega;
+    double nb;
+    double rel;
 
     
     for(int i=0;i<len;i++){
@@ -88,26 +90,29 @@ int main(){
         A = (double*)malloc(sizeof(double)*N[i]*N[i]);
         generate_Matrix(N[i],A);
         generate_Vector(N[i],b);
+
+        nb = computeMatrixInfiteNorm(N[i],1,b);
+        rel = nb*EPS8;
         
-        for(int k=1;k<101;k++){
+        for(int k=98;k<101;k++){
             omega=1.0+(double)k/101;
             iter=0;
             //memset(x1, 0, sizeof(double)*N[i]);
             memset(x2, 0, sizeof(double)*N[i]);
             do{
+                iter++;
                 //SOR_METHOD(N[i],A,b,x1,omega,x2);
                 //copyMatrix(N[i], x2, x1);
                 SOR_METHOD_ITER(N[i],A,b,x2,omega);
                 computeMatrixProduct(N[i],N[i],1,A,x2,b_hat);
                 computeMatrixMinus(N[i],b,b_hat,b_hat);
                 norm=computeMatrixInfiteNorm(N[i],1,b_hat);
-                printf(">>>iter:%d\n", iter);
-                printMatrix(x2,N[i],1);
-                if(iter%100==0){
-                    getchar();
+                //printf(">>>iter:%d\n", iter);
+                //printMatrix(x2,N[i],1);
+                if(iter%5000==0){
+                    printf("%d, %7.3f\n",iter,norm);
                 }
-                iter++;
-            }while(iter<MAX_ITER && norm>EPS8);
+            }while(iter<MAX_ITER && norm>rel);
             printf(">>> n=%4d,  omega=%2.3f,   iter=%5d\n", N[i],omega,iter);
         }
         
@@ -315,7 +320,7 @@ void SOR_METHOD(int n, double* A, double* b, double* in_x, double omega, double*
         for(j=i+1;j<n;j++){
             sum += A[i*n+j]*in_x[j];
         }
-        out_x[i] = (1-omega)*in_x[j]+omega*(b[j]-sum)/A[i*n+i];
+        out_x[i] = (1-omega)*in_x[i]+omega*(b[i]-sum)/A[i*n+i];
     }
 }
 
@@ -330,6 +335,6 @@ void SOR_METHOD_ITER(int n, double* A, double* b, double* x, double omega){
         for(j=i+1;j<n;j++){
             sum += A[i*n+j]*x[j];
         }
-        x[i] = (1-omega)*x[j]+omega*(b[j]-sum)/A[i*n+i];
+        x[i] = (1-omega)*x[i]+omega*(b[i]-sum)/A[i*n+i];
     }
 }
