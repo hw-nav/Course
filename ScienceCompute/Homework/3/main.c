@@ -4,6 +4,7 @@
 #include <string.h>
 
 #define EPS8 1e-8
+#define MAX_ITER 100000
 
 // Common Function
 void printMatrix(double *A, int row, int col);  // Print Matrix
@@ -15,60 +16,122 @@ double computeMatrixInfiteNorm(int row,int col, double* A);
 int GaussEliminationInverse(int n, double* A,double* invA);
 
 void generate_Matrix(int n, double* A); // The matrix in this problem
+void generate_Vector(int n, double* b);
 void get_Iter_Matrix(int n, double* A, double* B_J, double* B_GS);
 void SOR_METHOD(int n, double* A, double* b, double* in_x, double omega, double* out_x);
+void SOR_METHOD_ITER(int n, double* A, double* b, double* x, double omega);
 
 // For Homework3 Problem 6
 
 // ERROR: g++ -lm main.c
 int main(){
     int n;
-    double *A, *B_J, *B_GS, *I1, *I2;
-    double rho;
+    double *A, *B_J, *B_GS, *x1, *x2;
+    double rho, norm;
 
     // (c)
-    n = 4;
-    A=(double*)malloc(sizeof(double)*n*n);
-    B_J=(double*)malloc(sizeof(double)*n*n);
-    B_GS=(double*)malloc(sizeof(double)*n*n);
-    I1=(double*)malloc(sizeof(double)*n*n);
-    I2=(double*)malloc(sizeof(double)*n*n);
+    // n = 4;
+    // A=(double*)malloc(sizeof(double)*n*n);
+    // B_J=(double*)malloc(sizeof(double)*n*n);
+    // B_GS=(double*)malloc(sizeof(double)*n*n);
+    // x1=(double*)malloc(sizeof(double)*n*n);
+    // x2=(double*)malloc(sizeof(double)*n*n);
 
-    generate_Matrix(n,A);
-    get_Iter_Matrix(n,A,B_J,B_GS);
+    // generate_Matrix(n,A);
+    // get_Iter_Matrix(n,A,B_J,B_GS);
 
-    printf("Jacobi:\n");
-    copyMatrix(n*n,B_J,I2);
-    rho = computeMatrixInfiteNorm(n,n,I2);
-    printf(">>> k= 1, rho=%7.3f\n",rho);
-    copyMatrix(n*n,I2,I1);
-    for(int k=2;k<=20;k++){
-        computeMatrixProduct(n,n,n,I1,B_J,I2);
-        rho = computeMatrixInfiteNorm(n,n,I2);
-        rho = pow(rho,1.0/k);
-        printf(">>> k=%2d, rho=%7.3f\n",k,rho);
-        copyMatrix(n*n,I2,I1);
+    // printf("Jacobi:\n");
+    // copyMatrix(n*n,B_J,x2);
+    // norm = computeMatrixInfiteNorm(n,n,x2);
+    // printf(">>> k= 1, rho=%7.3f\n",norm);
+    // copyMatrix(n*n,x2,x1);
+    // for(int k=2;k<=20;k++){
+    //     computeMatrixProduct(n,n,n,x1,B_J,x2);
+    //     norm = computeMatrixInfiteNorm(n,n,x2);
+    //     rho = pow(norm,1.0/k);
+    //     printf(">>> k=%2d, rho=%7.3f\n",k,rho);
+    //     copyMatrix(n*n,x2,x1);
+    // }
+
+    // printf("Gauss-Siedel:\n");
+    // copyMatrix(n*n,B_GS,x2);
+    // norm = computeMatrixInfiteNorm(n,n,x2);
+    // printf(">>> k= 1, rho=%7.3f\n",norm);
+    // copyMatrix(n*n,x2,x1);
+    // for(int k=2;k<=20;k++){
+    //     computeMatrixProduct(n,n,n,x1,B_GS,x2);
+    //     norm = computeMatrixInfiteNorm(n,n,x2);
+    //     rho = pow(norm,1.0/k);
+    //     printf(">>> k=%2d, rho=%7.3f\n",k,rho);
+    //     copyMatrix(n*n,x2,x1);
+    // }
+
+    // free(A);
+    // free(B_J);
+    // free(B_GS);
+    // free(x1);
+    // free(x2);
+
+    // (d)
+    //int N[] = {1000,2000,4000,8000}, len=4;
+    int N[] = {3,4,5}, len=3;
+    int iter;
+    double *b, *b_hat;
+    double omega;
+
+    
+    for(int i=0;i<len;i++){
+        x1=(double*)malloc(sizeof(double)*N[i]);
+        x2=(double*)malloc(sizeof(double)*N[i]);
+        b=(double*)malloc(sizeof(double)*N[i]);
+        b_hat=(double*)malloc(sizeof(double)*N[i]);
+        A = (double*)malloc(sizeof(double)*N[i]*N[i]);
+        generate_Matrix(N[i],A);
+        generate_Vector(N[i],b);
+        
+        for(int k=1;k<101;k++){
+            omega=1.0+(double)k/101;
+            iter=0;
+            //memset(x1, 0, sizeof(double)*N[i]);
+            memset(x2, 0, sizeof(double)*N[i]);
+            do{
+                //SOR_METHOD(N[i],A,b,x1,omega,x2);
+                //copyMatrix(N[i], x2, x1);
+                SOR_METHOD_ITER(N[i],A,b,x2,omega);
+                computeMatrixProduct(N[i],N[i],1,A,x2,b_hat);
+                computeMatrixMinus(N[i],b,b_hat,b_hat);
+                norm=computeMatrixInfiteNorm(N[i],1,b_hat);
+                printf(">>>iter:%d\n", iter);
+                printMatrix(x2,N[i],1);
+                if(iter%100==0){
+                    getchar();
+                }
+                iter++;
+            }while(iter<MAX_ITER && norm>EPS8);
+            printf(">>> n=%4d,  omega=%2.3f,   iter=%5d\n", N[i],omega,iter);
+        }
+        
+        free(x1);
+        free(x2);
+        free(b);
+        free(b_hat);
+        free(A);
     }
-
-    printf("Gauss-Siedel:\n");
-    copyMatrix(n*n,B_GS,I2);
-    rho = computeMatrixInfiteNorm(n,n,I2);
-    printf(">>> k= 1, rho=%7.3f\n",rho);
-    copyMatrix(n*n,I2,I1);
-    for(int k=2;k<=20;k++){
-        computeMatrixProduct(n,n,n,I1,B_GS,I2);
-        rho = computeMatrixInfiteNorm(n,n,I2);
-        rho = pow(rho,1.0/k);
-        printf(">>> k=%2d, rho=%7.3f\n",k,rho);
-        copyMatrix(n*n,I2,I1);
-    }
-
-    free(A);
-    free(B_J);
-    free(B_GS);
-    free(I1);
-    free(I2);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -192,6 +255,13 @@ void generate_Matrix(int n, double* A){
     A[1]=-dn2;
     A[n*n-2]=-dn2;
 }
+void generate_Vector(int n, double* b){
+    double x;
+    for(int i=1;i<=n;i++){
+        x = (double)i/n;
+        b[i]= (3*x+x*x)*exp(x);
+    }
+}
 
 void get_Iter_Matrix(int n, double* A, double* B_J, double* B_GS){
     double* L = (double*)malloc(sizeof(double)*n*n);
@@ -246,5 +316,20 @@ void SOR_METHOD(int n, double* A, double* b, double* in_x, double omega, double*
             sum += A[i*n+j]*in_x[j];
         }
         out_x[i] = (1-omega)*in_x[j]+omega*(b[j]-sum)/A[i*n+i];
+    }
+}
+
+void SOR_METHOD_ITER(int n, double* A, double* b, double* x, double omega){
+    double sum;
+    int j;
+    for(int i=0;i<n;i++){
+        sum=0.0;
+        for(j=0;j<i;j++){
+            sum += A[i*n+j]*x[j];
+        }
+        for(j=i+1;j<n;j++){
+            sum += A[i*n+j]*x[j];
+        }
+        x[i] = (1-omega)*x[j]+omega*(b[j]-sum)/A[i*n+i];
     }
 }
