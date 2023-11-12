@@ -29,99 +29,104 @@ int main(){
     double *A, *B_J, *B_GS, *x1, *x2;
     double rho, norm;
 
-    // (c)
-    // n = 4;
-    // A=(double*)malloc(sizeof(double)*n*n);
-    // B_J=(double*)malloc(sizeof(double)*n*n);
-    // B_GS=(double*)malloc(sizeof(double)*n*n);
-    // x1=(double*)malloc(sizeof(double)*n*n);
-    // x2=(double*)malloc(sizeof(double)*n*n);
+    //(c)
+    n = 4;
+    A=(double*)malloc(sizeof(double)*n*n);
+    B_J=(double*)malloc(sizeof(double)*n*n);
+    B_GS=(double*)malloc(sizeof(double)*n*n);
+    x1=(double*)malloc(sizeof(double)*n*n);
+    x2=(double*)malloc(sizeof(double)*n*n);
 
-    // generate_Matrix(n,A);
-    // get_Iter_Matrix(n,A,B_J,B_GS);
+    generate_Matrix(n,A);
+    get_Iter_Matrix(n,A,B_J,B_GS);
 
-    // printf("Jacobi:\n");
-    // copyMatrix(n*n,B_J,x2);
-    // norm = computeMatrixInfiteNorm(n,n,x2);
-    // printf(">>> k= 1, rho=%7.3f\n",norm);
-    // copyMatrix(n*n,x2,x1);
-    // for(int k=2;k<=20;k++){
-    //     computeMatrixProduct(n,n,n,x1,B_J,x2);
-    //     norm = computeMatrixInfiteNorm(n,n,x2);
-    //     rho = pow(norm,1.0/k);
-    //     printf(">>> k=%2d, rho=%7.3f\n",k,rho);
-    //     copyMatrix(n*n,x2,x1);
-    // }
-
-    // printf("Gauss-Siedel:\n");
-    // copyMatrix(n*n,B_GS,x2);
-    // norm = computeMatrixInfiteNorm(n,n,x2);
-    // printf(">>> k= 1, rho=%7.3f\n",norm);
-    // copyMatrix(n*n,x2,x1);
-    // for(int k=2;k<=20;k++){
-    //     computeMatrixProduct(n,n,n,x1,B_GS,x2);
-    //     norm = computeMatrixInfiteNorm(n,n,x2);
-    //     rho = pow(norm,1.0/k);
-    //     printf(">>> k=%2d, rho=%7.3f\n",k,rho);
-    //     copyMatrix(n*n,x2,x1);
-    // }
-
-    // free(A);
-    // free(B_J);
-    // free(B_GS);
-    // free(x1);
-    // free(x2);
-
-    // (d)
-    int N[] = {1000,2000,4000,8000}, len=4;
-    //int N[] = {100,300,500}, len=3;
-    int iter;
-    double *b, *b_hat;
-    double omega;
-    double nb;
-    double rel;
-
-    
-    for(int i=0;i<len;i++){
-        x1=(double*)malloc(sizeof(double)*N[i]);
-        x2=(double*)malloc(sizeof(double)*N[i]);
-        b=(double*)malloc(sizeof(double)*N[i]);
-        b_hat=(double*)malloc(sizeof(double)*N[i]);
-        A = (double*)malloc(sizeof(double)*N[i]*N[i]);
-        generate_Matrix(N[i],A);
-        generate_Vector(N[i],b);
-
-        nb = computeMatrixInfiteNorm(N[i],1,b);
-        rel = nb*EPS8;
-        
-        for(int k=98;k<101;k++){
-            omega=1.0+(double)k/101;
-            iter=0;
-            //memset(x1, 0, sizeof(double)*N[i]);
-            memset(x2, 0, sizeof(double)*N[i]);
-            do{
-                iter++;
-                //SOR_METHOD(N[i],A,b,x1,omega,x2);
-                //copyMatrix(N[i], x2, x1);
-                SOR_METHOD_ITER(N[i],A,b,x2,omega);
-                computeMatrixProduct(N[i],N[i],1,A,x2,b_hat);
-                computeMatrixMinus(N[i],b,b_hat,b_hat);
-                norm=computeMatrixInfiteNorm(N[i],1,b_hat);
-                //printf(">>>iter:%d\n", iter);
-                //printMatrix(x2,N[i],1);
-                if(iter%5000==0){
-                    printf("%d, %7.3f\n",iter,norm);
-                }
-            }while(iter<MAX_ITER && norm>rel);
-            printf(">>> n=%4d,  omega=%2.3f,   iter=%5d\n", N[i],omega,iter);
+    printf("Jacobi:\n");
+    copyMatrix(n*n,B_J,x2);
+    norm = computeMatrixInfiteNorm(n,n,x2);
+    printf(">>> k= 1, rho=%7.3f\n",norm);
+    copyMatrix(n*n,x2,x1);
+    for(int k=2;k<=2001;k++){
+        computeMatrixProduct(n,n,n,x1,B_J,x2);
+        norm = computeMatrixInfiteNorm(n,n,x2);
+        rho = pow(norm,1.0/k);
+        if(k%200==1){
+            printf(">>> k=%3d, rho=%7.3f\n",k,rho);
         }
         
-        free(x1);
-        free(x2);
-        free(b);
-        free(b_hat);
-        free(A);
+        copyMatrix(n*n,x2,x1);
     }
+
+    printf("Gauss-Siedel:\n");
+    copyMatrix(n*n,B_GS,x2);
+    norm = computeMatrixInfiteNorm(n,n,x2);
+    printf(">>> k= 1, rho=%7.3f\n",norm);
+    copyMatrix(n*n,x2,x1);
+    for(int k=2;k<=2001;k++){
+        computeMatrixProduct(n,n,n,x1,B_GS,x2);
+        norm = computeMatrixInfiteNorm(n,n,x2);
+        rho = pow(norm,1.0/k);
+        if(k%200==1){
+            printf(">>> k=%3d, rho=%7.3f\n",k,rho);
+        }
+        copyMatrix(n*n,x2,x1);
+    }
+
+    free(A);
+    free(B_J);
+    free(B_GS);
+    free(x1);
+    free(x2);
+
+    // // (d)
+    // int N[] = {1000,2000,4000,8000}, len=4;
+    // //int N[] = {100,300,500}, len=3;
+    // int iter;
+    // double *b, *b_hat;
+    // double omega;
+    // double nb;
+    // double rel;
+
+    
+    // for(int i=0;i<len;i++){
+    //     x1=(double*)malloc(sizeof(double)*N[i]);
+    //     x2=(double*)malloc(sizeof(double)*N[i]);
+    //     b=(double*)malloc(sizeof(double)*N[i]);
+    //     b_hat=(double*)malloc(sizeof(double)*N[i]);
+    //     A = (double*)malloc(sizeof(double)*N[i]*N[i]);
+    //     generate_Matrix(N[i],A);
+    //     generate_Vector(N[i],b);
+
+    //     nb = computeMatrixInfiteNorm(N[i],1,b);
+    //     rel = nb*EPS8;
+        
+    //     for(int k=98;k<101;k++){
+    //         omega=1.0+(double)k/101;
+    //         iter=0;
+    //         //memset(x1, 0, sizeof(double)*N[i]);
+    //         memset(x2, 0, sizeof(double)*N[i]);
+    //         do{
+    //             iter++;
+    //             //SOR_METHOD(N[i],A,b,x1,omega,x2);
+    //             //copyMatrix(N[i], x2, x1);
+    //             SOR_METHOD_ITER(N[i],A,b,x2,omega);
+    //             computeMatrixProduct(N[i],N[i],1,A,x2,b_hat);
+    //             computeMatrixMinus(N[i],b,b_hat,b_hat);
+    //             norm=computeMatrixInfiteNorm(N[i],1,b_hat);
+    //             //printf(">>>iter:%d\n", iter);
+    //             //printMatrix(x2,N[i],1);
+    //             if(iter%5000==0){
+    //                 printf("%5d, %11.8f\n",iter,norm);
+    //             }
+    //         }while(iter<MAX_ITER && norm>rel);
+    //         printf(">>> n=%4d,  omega=%2.3f,   iter=%5d\n", N[i],omega,iter);
+    //     }
+        
+    //     free(x1);
+    //     free(x2);
+    //     free(b);
+    //     free(b_hat);
+    //     free(A);
+    //}
 }
 
 
