@@ -8,6 +8,8 @@ void Question3();
 void Question4();
 void Question5();
 void Question6();
+void Question8();
+void Question9();
 
 
 // g++ -lm main.c
@@ -16,6 +18,7 @@ int main(){
     Question4();
     Question5();
     Question6();
+    Question8();
     return 0;
 }
 
@@ -45,6 +48,7 @@ void Question4(){
     printf("                   Question 4                   \n");
     printf("================================================\n");
     int n=1, k=5;
+    double trueValue = 0.8556243918921488031733046202800450612264142850914972603202342815;
     double sum;
     for(int i=0;i<k;i++){
         n = 2*n;
@@ -55,7 +59,7 @@ void Question4(){
             //printf("%f\n",sum);
         }
         sum = sum/n;
-        printf(">>>%f\n",sum);
+        printf(">>>%f, %e\n",sum, sum-trueValue);
     }
 }
 
@@ -67,6 +71,7 @@ void Question5(){
     printf("================================================\n");
     int n=1, k=5;
     double sum,t;
+    double trueValue = 16.0/15.0;
     for(int i=0;i<k;i++){
         n = 2*n;
         sum = 0.0;
@@ -78,7 +83,7 @@ void Question5(){
             //printf("%f\n",sum);
         }
         sum = 2.0*sum/n;
-        printf(">>>%f\n",sum);
+        printf(">>>%f, %e\n",sum,sum-trueValue);
     }
 }
 
@@ -100,10 +105,55 @@ void Question6(){
         sum = 0.5*a/b;
         for(int j=1;j<n;j++){
             sum += ab/(a2b2_plus-a2b2_minus*cos(2.0*PI*j/n));
-            //printf("%f\n",sum);
         }
         sum = 2.0*PI*sum/n;
-        printf(">>>%f\n",sum);
+        printf(">>>%f, %e\n",sum,sum-PI);
+    }
+}
+
+void Question8(){
+    printf("================================================\n");
+    printf("                   Question 8                   \n");
+    printf("================================================\n");
+    int n=1, k=5;
+    double trueValue = 1.0-exp(-1.0);
+    double sum,t,xc,s1,s2,s3; // xc - x-center
+    printf("    |  Simpson  |  Two-Node GL  |  Three-Node GL\n");
+    for(int i=0;i<k;i++){
+        n = 2*n;
+        printf("n=%2d:",n);
+        sum = 1.0+exp(-1.0);
+        s1=0.0, s2=0.0;
+        for(int j=1;j<n;j++){
+            s1 += exp(-((double)j-0.5)/n);
+            s2 += exp(-(double)j/n);
+        }
+        s1 += exp(-((double)n-0.5)/n);
+        sum += 4.0*s1 + 2.0*s2;
+        sum = sum/(6.0*n);
+        printf("%f  %e",sum,sum-trueValue);
+
+        sum = 0.0;
+        t = sqrt(1.0/3.0)*0.5/n;
+        for(int j=1;j<=n;j++){
+            xc = (j-0.5)/n;
+            sum += exp(-(xc-t)) + exp(-(xc+t));
+        }
+        sum = sum/(2.0*n);
+        printf("   %f  %e",sum,sum-trueValue);
+
+        sum = 0.0;
+        t = sqrt(0.6)*0.5/n;
+        s1=0.0, s2=0.0, s3=0.0;
+        for(int j=1;j<=n;j++){
+            xc = (j-0.5)/n;
+            s1 += exp(-(xc-t));
+            s2 += exp(-xc);
+            s3 += exp(-(xc+t));
+        }
+        sum = 5.0*s1+8.0*s2+5.0*s3;
+        sum = sum/(18.0*n);
+        printf("   %f  %e\n",sum,sum-trueValue);
     }
 }
 
