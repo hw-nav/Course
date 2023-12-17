@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #define PI 3.14159265358979323846264338327950288
+#define constN 6
 
 void Question3();
 void Question4();
@@ -19,6 +21,7 @@ int main(){
     Question5();
     Question6();
     Question8();
+    Question9();
     return 0;
 }
 
@@ -38,7 +41,7 @@ void Question3(){
         fpos = exp(-(x+h)*(x+h));
         diffForward = (fpos-f0)/h;
         diffCentered = (fpos-fneg)/(2.0*h);
-        printf("%2d   %3.16f   %15.12f   %15.12f\n",k,h,diffForward-trueDiff,diffCentered-trueDiff);
+        printf("%2d   %e   %e   %e\n",k,h,diffForward-trueDiff,diffCentered-trueDiff);
     }
 }
 
@@ -157,4 +160,88 @@ void Question8(){
     }
 }
 
+
+
+void Question9(){
+    printf("================================================\n");
+    printf("                   Question 9                   \n");
+    printf("================================================\n");
+
+    double I[constN][constN];
+    memset(I,0,sizeof(double)*constN*constN); // I[k][log2(N)-2]
+    int n=2;
+
+    for(int i=0;i<constN;i++){
+        n = 2*n;
+        I[i][0] = 0.0;
+        for(int j=0;j<n;j++){
+            I[i][0] += 4.0/(1.0+(j+0.5)*(j+0.5)/n/n);
+        }
+        I[i][0] = I[i][0]/n;
+        for(int k=1;k<=i;k++){
+            I[i][k] = (pow(4.0,k)*I[i][k-1]-I[i-1][k-1])/(pow(4.0,k)-1.0);
+        }
+    }
+    printf(" n=       4          8         16         32\n");
+    n = 2;
+    for(int k=0;k<constN;k++){
+        n = 2*n;
+        printf("k=%d",k);
+        for(int i=0;i<k;i++){
+            printf("           ");
+        }
+        for(int i=k;i<constN;i++){
+            printf("   %f",I[i][k]);
+        }
+        
+        printf("\n");
+    }
+
+    printf(" n=         4              8             16             32\n");
+    n = 2;
+    for(int k=0;k<constN;k++){
+        n = 2*n;
+        printf("k=%d",k);
+        for(int i=0;i<k;i++){
+            printf("               ");
+        }
+        for(int i=k;i<constN;i++){
+            printf("   %e",I[i][k]-PI);
+        }
+        
+        printf("\n");
+    }
+
+
+    // double In0[4], In1[3], In2[2], In3[1];
+    // int n=2,k=4;
+    // printf("      In0      In1      In2     In3\n");
+    // for(int i=0;i<k;i++){
+    //     n=2*n;
+    //     In0[i] = 0.0;
+    //     for(int j=0;j<n;j++){
+    //         In0[i] += 4.0/(1.0+(j+0.5)*(j+0.5)/n/n);
+    //     }
+    //     In0[i] =In0[i]/n;
+    //     printf("%2d: %f",n, In0[i]);
+    //     if(i>0){
+    //         In1[i-1] = (4.0*In0[i] - In0[i-1])/3.0;
+    //         printf("   %f",In1[i-1]);
+    //     }
+    //     if(i>1){
+    //         In2[i-2] = (16.0*In1[i-1] - In1[i-2])/15.0;
+    //         printf("   %f",In2[i-2]);
+    //     }
+    //     if(i>2){
+    //         In3[i-3] = (64.0*In2[i-2] - In2[i-3])/63.0;
+    //         printf("   %f",In3[i-3]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("   4   8   16   32\n");
+    // printf("en0:%e  %e  %e  %e\n",In0[0]-PI,In0[1]-PI,In0[2]-PI,In0[3]-PI);
+    // printf("en1:              %e  %e  %e\n",In1[0]-PI,In1[1]-PI,In1[2]-PI);
+    // printf("en2:                            %e  %e\n",In2[0]-PI,In2[1]-PI);
+    // printf("en3:                                          %e\n",In3[0]-PI);
+}
 
