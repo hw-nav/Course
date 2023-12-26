@@ -21,8 +21,8 @@ void Question4();
 // g++ -lm main.c
 int main(){
     Question1();
-    Question2();
-    Question3();
+    //Question2();
+    //Question3();
     Question4();
     return 0;
 }
@@ -40,6 +40,7 @@ void Question1(){
     printf("=========== Question 1 ===========\n");
     double N = 5.0, dt;
     double u0=0.3, u1, u2, ut;
+    double ul[3];
     for(int i=0;i<4;i++){
         // Delta t
         dt = 1.0/N;
@@ -50,6 +51,10 @@ void Question1(){
             u1 += dt*f1(u1);
         }
         printf("%f",u1);
+        if(i>0){
+            printf(",%e", u1-ul[0]);
+        }
+        ul[0] = u1;
 
         //Backward Euler
         u1 = u0;
@@ -63,6 +68,10 @@ void Question1(){
             u1 = u2;
         }
         printf("   %f",u2);
+        if(i>0){
+            printf(",%e", u2-ul[1]);
+        }
+        ul[1] = u2;
 
         // Trapezoidal Method
         u1 = u0;
@@ -76,10 +85,14 @@ void Question1(){
             u1 = u2;
         }
         printf("   %f",u2);
+        if(i>0){
+            printf(",%e", u2-ul[2]);
+        }
+        ul[2] = u2;
 
         // double N: 5->10->20->40
         N = 2.0*N;
-        printf("\n");
+        printf("\n");     
     }
 }
 
@@ -146,7 +159,7 @@ void Question3(){
             t2  = (j+1)*dt;
             u2 = u1 + dt * f3(t1,u1);
             u1 = u2;
-            printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
+            //printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
         }
         // Backward Euler
         printf("Backward Euler\n");
@@ -165,7 +178,7 @@ void Question3(){
             if(iter == MAXITER){
                 printf("Error MAX Iterate ---");
             }
-            printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
+            //printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
             u1 = u2;
         }
         // Trapezoidal Method
@@ -184,7 +197,7 @@ void Question3(){
             if(iter == MAXITER){
                 printf("Error MAX Iterate ---");
             }
-            printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
+            // printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
             u1 = u2;
         }
         // Runge-Kutta
@@ -198,7 +211,7 @@ void Question3(){
             k3 = f3(t1+0.5*dt,u1+0.5*dt*k2);
             k4 = f3(t1+dt,u1+dt*k3);
             u2 = u1 + dt*(k1+2.0*k2+2.0*k3+k4)/6.0;
-            printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
+            // printf("%f,%f,%e\n",t2,u2,u2-trueValue[j+1]);
             u1 = u2;
             //printf("k1=%f, k2=%f, k3=%f, k4=%f, u=%f\n",k1,k2,k3,k4,u2);
         }
@@ -221,18 +234,20 @@ void Question4(){
     int N = 20; // N*dt=1.0
     double x0=PI/6.0,y0=0.0; // x:theta, y:theta prime
     double x1,y1,x2,y2,xt,yt;
+    double t1,t2,k1[2],k2[2],k3[2],k4[2];
 
     // Forward Euler
     printf("Forward Euler\n");
     x1 = x0;
     y1 = y0;
     printf("%f,%f,%f\n",0.0,x1,y1);
-    for(int j=0;j<N;j++){
+    for(int j=0;j<4*N;j++){
+        t2 = (j+1)*dt;
         x2 = x1 + y1 * dt;
         y2 = y1 - 16.0 * sin(x1) *dt;
         x1 = x2;
         y1 = y2;
-        printf("%f,%f,%f\n",dt*(j+1),x1,y1);
+        printf("%f,%f,%f\n",t2,x2,y2);
     }
 
     // Backward Euler
@@ -240,7 +255,8 @@ void Question4(){
     x1 = x0;
     y1 = y0;
     printf("%f,%f,%f\n",0.0,x1,y1);
-    for(int j=0;j<N;j++){
+    for(int j=0;j<4*N;j++){
+        t2 = (j+1)*dt;
         xt = x1 + y1 * dt;
         yt = y1 - 16.0 * sin(x1) * dt;
         x2 = x1 + yt * dt;
@@ -253,7 +269,7 @@ void Question4(){
         }
         x1 = x2;
         y1 = y2;
-        printf("%f,%f,%f\n",dt*(j+1),x1,y1);
+        printf("%f,%f,%f\n",t2,x2,y2);
     }
 
     // Trapezoidal Method
@@ -261,7 +277,8 @@ void Question4(){
     x1 = x0;
     y1 = y0;
     printf("%f,%f,%f\n",0.0,x1,y1);
-    for(int j=0;j<N;j++){
+    for(int j=0;j<4*N;j++){
+        t2 = (j+1)*dt;
         xt = x1 + y1 * dt;
         yt = y1 - 16.0 * sin(x1) * dt;
         x2 = x1 + 0.5 * (y1+yt) * dt;
@@ -270,13 +287,32 @@ void Question4(){
             xt = x2;
             yt = y2;
             x2 = x1 + 0.5 * (y1+yt) * dt;
-        y2 = y1 - 8.0 * (sin(x1) + sin(xt)) * dt;
+            y2 = y1 - 8.0 * (sin(x1) + sin(xt)) * dt;
         }
         x1 = x2;
         y1 = y2;
-        printf("%f,%f,%f\n",dt*(j+1),x1,y1);
+        printf("%f,%f,%f\n",t2,x2,y2);
     }
 
+    // Runge-Kutta
+    printf("Runge-Kutta\n");
+    for(int j=0;j<4*N;j++){
+        t1  = dt*j; 
+        t2  = dt*(j+1);
+        k1[0] = y1;
+        k1[1] = -16.0*sin(x1);
+        k2[0] = y1+0.5*dt*k1[1];
+        k2[1] = -16.0*sin(x1+0.5*dt*k1[0]);
+        k3[0] = y1+0.5*dt*k2[1];
+        k3[1] = -16.0*sin(x1+0.5*dt*k2[0]);
+        k4[0] = y1+dt*k3[1];
+        k4[1] = -16.0*sin(x1+dt*k3[0]);
+        x2 = x1 + dt*(k1[0]+2.0*k2[0]+2.0*k3[0]+k4[0])/6.0;
+        y2 = y1 + dt*(k1[1]+2.0*k2[1]+2.0*k3[1]+k4[1])/6.0;
+        x1 = x2;
+        y1 = y2;
+        printf("%f,%f,%f\n",t2,x2,y2);
+    }
 }
 
 
